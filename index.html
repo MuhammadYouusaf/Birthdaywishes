@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Jaan ❤️ Happy Birthday Afreen</title>
+    <style>
+        /*
+         * ======================================
+         * 1. BASE STYLES & ANIMATIONS
+         * ======================================
+         */
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            
+            /* --- FIXED BACKGROUND IMAGE SETTINGS --- */
+            background-image: url('images.jpeg'); 
+            background-repeat: no-repeat;
+            background-size: cover; 
+            background-attachment: fixed; 
+            background-position: center center;
+        }
+
+        #countdown-screen, #cake-screen, #message-screen, #loading-screen {
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%; 
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            box-sizing: border-box;
+            flex-direction: column; 
+            transition: opacity 0.5s ease-out;
+            background: rgba(0, 0, 0, 0.4); 
+        }
+
+        /* Countdown and Cake screens still use a semi-dark overlay for drama */
+        #countdown-screen, #cake-screen {
+             background: rgba(0, 0, 0, 0.6); 
+        }
+        
+        /* LIGHT BACKGROUND CLASS (Kept for compatibility) */
+        .light-background {
+            background: #fffff0 !important; 
+            transition: background 0.1s; 
+        }
+
+        /* COUNTDOWN STYLES */
+        #countdown-screen { flex-direction: column; }
+        #countdown {
+            font-size: 8em;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 10px #FFD700, 0 0 30px #FFD700, 0 0 50px #FF6F61; 
+            animation: pulse 1s infinite alternate; 
+            letter-spacing: 5px;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+        
+        /* BALLOONS */
+        .balloons { position: fixed; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+        .balloon { position: absolute; top: 100vh; animation: floatUp 5s linear infinite; transition: transform 0.1s, opacity 0.5s; }
+        .balloon.burst { opacity: 0; }
+        @keyframes floatUp {
+             0% { transform: translateY(0) rotate(0deg); opacity: 0.9; }
+             50% { transform: translateY(-50vh) rotate(5deg); opacity: 1; }
+             100% { transform: translateY(-100vh) rotate(-5deg); opacity: 0; }
+        }
+        
+        /* FIREWORKS CONTAINER - Hidden */
+        .fireworks-container { display: none; } 
+
+        /* GENERAL BUTTONS */
+        .btn { 
+            padding: 15px 30px; 
+            font-size: 1.6em; 
+            border: none; 
+            cursor: pointer; 
+            margin: 15px 15px; 
+            border-radius: 50px; 
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.3); 
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s; 
+            font-weight: bold; 
+            letter-spacing: 1px; 
+        }
+        .btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0px 12px 20px rgba(0, 0, 0, 0.4);
+        }
+        #knife-btn { background-color: #ff6f61; color: white; }
+        #gift-btn { background-color: #FFC300; color: #333; }
+        #btn-yes { background-color: #4CAF50; color: white; } 
+        #btn-no { background-color: #f44336; color: white; } 
+        #letter-btn { background-color: #00bcd4; color: white; }
+        
+        /* CAKE */
+        #cake-img { 
+            width: 350px; 
+            height: 350px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5); 
+            transition: transform 0.5s, box-shadow 0.5s;
+        }
+        #cake-img.clicked { 
+            transform: rotate(-10deg) scale(1.05); 
+            box-shadow: 0 20px 40px rgba(255, 99, 71, 0.8); 
+        }
+
+        /* MESSAGE TEXT */
+        #message-text { 
+            font-size: 3.5em; 
+            font-weight: 900; 
+            color: #FFD700; 
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7); 
+            margin-bottom: 30px; 
+            animation: textGlow 1.5s ease-out infinite alternate;
+        }
+        @keyframes textGlow {
+            0% { text-shadow: 0 0 10px rgba(255, 111, 97, 1); }
+            100% { text-shadow: 0 0 20px rgba(255, 111, 97, 0.7); }
+        }
+
+
+        /*
+         * ======================================
+         * 2. LOADING SCREEN STYLES
+         * ======================================
+         */
+
+        #loading-screen {
+            background-color: black;
+            color: white;
+            text-shadow: 0 0 5px red;
+
+            /* Heart Emoji Love Background */
+            background-image: 
+                repeating-linear-gradient(45deg, rgba(255, 0, 0, 0.1) 0, rgba(255, 0, 0, 0.1) 10px, transparent 10px, transparent 20px),
+                repeating-linear-gradient(135deg, rgba(255, 192, 203, 0.1) 0, rgba(255, 192, 203, 0.1) 10px, transparent 10px, transparent 20px);
+            background-size: 40px 40px;
+        }
+        
+        #loading-message {
+            font-size: 2em;
+            font-weight: bold;
+            color: #FF6F61;
+            margin-bottom: 20px;
+        }
+        
+        #loading-time {
+            font-size: 3em;
+            color: #FFC300;
+            margin-top: 10px;
+            font-weight: 900;
+        }
+        
+        #loading-bar-container {
+            width: 300px;
+            height: 30px;
+            border: 2px solid white;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        #loading-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #f44336; /* Red color for loading */
+            transition: width 3s linear; /* The actual loading animation */
+        }
+        
+        #loading-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+
+        /*
+         * ======================================
+         * 3. FINAL GIFT CARD STYLES (UNCHANGED)
+         * ======================================
+         */
+
+        #final-gift-card {
+            display: none; 
+            background-color: #ffe6e6; /* Light pink background */
+            width: 800px;
+            height: 500px;
+            padding: 30px;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden; 
+            border-radius: 20px;
+            margin-top: 30px;
+            animation: fadeIn 1.5s ease-out;
+            
+            /* Grid Pattern */
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.6) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.6) 1px, transparent 1px);
+            background-size: 20px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Header Section */
+        .gift-header-section {
+            position: absolute; left: 10%; top: 15%; display: flex; flex-direction: column; align-items: flex-start; z-index: 10;
+        }
+
+        .gift-birthday-text {
+            font-size: 80px; font-weight: 900; color: white; 
+            /* 3D Stroke Effect in Red-Pink */
+            text-shadow: -4px -4px 0px #ff6b81, 4px 4px 0px #ff6b81, -4px 4px 0px #ff6b81, 4px -4px 0px #ff6b81, 0 0 5px rgba(0,0,0,0.2);
+            line-height: 0.8; letter-spacing: -2px;
+        }
+        
+        .gift-date-box {
+            background-color: white; color: #ff6b81; font-weight: bold; padding: 8px 15px; border-radius: 20px; margin-top: 20px; border: 3px solid #ff6b81; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Profile Section */
+        .gift-profile-section {
+            position: absolute; right: 5%; top: 20%; display: flex; flex-direction: column; align-items: center;
+        }
+
+        .gift-profile-circle {
+            width: 200px; height: 200px; border-radius: 50%; overflow: hidden; border: 10px solid black; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); background-color: white;
+        }
+
+        .gift-profile-pic {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+        }
+
+        .gift-name-tag {
+            background-color: #ff6b81; color: white; font-weight: bold; padding: 5px 20px; border-radius: 20px; margin-top: 10px; position: relative; top: -20px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* DECORATIONS */
+        .gift-profile-section::before { /* Balloon 1 (Right Top) */
+            content: ''; position: absolute; top: -50px; right: 50px; width: 40px; height: 60px; background-color: #ff6b81; border-radius: 50%; z-index: 5; box-shadow: inset -5px -5px 10px rgba(0, 0, 0, 0.2);
+        }
+        .gift-header-section::after { /* Party Hat */
+            content: ''; position: absolute; top: -20px; right: -20px; width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 60px solid #ff6b81; transform: rotate(-10deg); z-index: 10;
+        }
+        #final-gift-card::before { /* Bunting/Banner (Top edge) */
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 20px; z-index: 1;
+            background-image: repeating-linear-gradient(45deg, #ff6b81, #ff6b81 10px, #ffffff 10px, #ffffff 20px);
+        }
+        
+        .gift-personal-message {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            font-size: 1.2em;
+            color: #333;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        /* === MOBILE OPTIMIZATIONS === */
+        @media (max-width: 600px) {
+            #countdown {
+                font-size: 5em; /* Smaller countdown text */
+            }
+            #message-text {
+                font-size: 2.5em; /* Smaller birthday message */
+            }
+            .btn {
+                padding: 12px 20px;
+                font-size: 1.2em; /* Smaller buttons */
+            }
+            #cake-img {
+                width: 250px;
+                height: 250px; /* Smaller cake */
+            }
+            #loading-message {
+                font-size: 1.5em;
+            }
+            #loading-time {
+                font-size: 2em;
+            }
+            #final-gift-card {
+                width: 95%; /* Make card fit phone screen */
+                height: auto;
+                padding: 15px;
+            }
+            .gift-birthday-text {
+                font-size: 50px; /* Smaller card text */
+                line-height: 1;
+            }
+            .gift-profile-section {
+                right: 50%;
+                transform: translateX(50%);
+                top: 50%;
+            }
+            .gift-profile-circle {
+                width: 120px;
+                height: 120px;
+                border-width: 5px;
+            }
+            .gift-personal-message {
+                bottom: 10px;
+                font-size: 1em;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="balloons" id="balloons-container">
+        <img src="image4.png" alt="Balloon" class="balloon" style="left: 10%; animation-duration: 5s; animation-delay: 0.5s; transform: scale(0.8);">
+        <img src="image3.png" alt="Balloon" class="balloon" style="left: 30%; animation-duration: 4s; animation-delay: 0s; transform: scale(1.1);">
+        <img src="image2.png" alt="Balloon" class="balloon" style="left: 50%; animation-duration: 6s; animation-delay: 1s; transform: scale(0.9);">
+        <img src="image1.png" alt="Balloon" class="balloon" style="left: 70%; animation-duration: 4.5s; animation-delay: 0.2s; transform: scale(1.2);">
+        <img src="image.png" alt="Balloon" class="balloon" style="left: 90%; animation-duration: 5.5s; animation-delay: 0.8s; transform: scale(1);">
+    </div>
+
+    <div class="fireworks-container" id="fireworks-container"></div>
+
+    <div id="countdown-screen">
+        <h1 id="countdown">10</h1>
+    </div>
+    
+    <div id="loading-screen" style="display: none;">
+        <img id="loading-image" src="download.png" alt="Loading bar">
+        <h2 id="loading-message">MY JAAN YOUR CAKE WAS GETTING READY</h2>
+        
+        <div id="loading-bar-container">
+            <div id="loading-bar"></div>
+        </div>
+        
+        <div id="loading-time">3 ❤️</div>
+    </div>
+    <div id="cake-screen" style="display:none; height: 100vh; flex-direction: column;">
+        <div class="cake-container">
+            <img id="cake-img" src="cake .png" alt="Cake"> 
+            <button id="knife-btn" class="btn">Cut The Cake</button>
+        </div>
+    </div>
+
+    <div id="message-screen" style="display:none; flex-direction: column;">
+        <h1 id="message-text"></h1>
+
+        <div id="gift-buttons">
+            <button id="gift-btn" class="btn">ARE YOU ACCEPTING MY GIFT?</button>
+        </div>
+
+        <div id="yes-no-buttons" style="display: none;">
+            <button id="btn-yes" class="btn">Yes</button>
+            <button id="btn-no" class="btn">No</button>
+        </div>
+
+        <button id="letter-btn" class="btn" style="display:none;">Open Gift Card</button>
+
+        <div id="final-gift-card">
+            
+            <div class="gift-header-section">
+                <div class="gift-birthday-text">Happy<br>Birthday</div>
+                <div class="gift-date-box">
+                    <span class="star">★</span> Dear Afreen <span class="star">★</span>
+                </div>
+            </div>
+
+            <div class="gift-profile-section">
+                <div class="gift-profile-circle">
+                    <img src="picture.png.jpeg" alt="Afreen" class="gift-profile-pic">
+                </div>
+                <div class="gift-name-tag">My Jaan ❤️</div>
+            </div>
+            
+            <div class="gift-personal-message">
+                <p>I wish you all the joy, love, and success in the world. Every moment with you is a gift, and I cherish it dearly. Enjoy your special day!</p>
+                <p style="text-align: right; font-weight: bold; margin-top: 10px;">- Muhammad Yousaf</p>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // --- Element Declarations ---
+        let countdownValue = 10;
+        const countdownElement = document.getElementById('countdown');
+        const countdownScreen = document.getElementById('countdown-screen');
+        const cakeScreen = document.getElementById('cake-screen');
+        const messageScreen = document.getElementById('message-screen');
+        const giftBtn = document.getElementById('gift-btn');
+        const yesNoButtons = document.getElementById('yes-no-buttons');
+        const letterBtn = document.getElementById('letter-btn');
+        const knifeBtn = document.getElementById('knife-btn');
+        const cakeImg = document.getElementById('cake-img');
+        const finalGiftCard = document.getElementById('final-gift-card');
+        const messageText = document.getElementById('message-text');
+
+        // New Loading Screen Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const loadingBar = document.getElementById('loading-bar');
+        const loadingTime = document.getElementById('loading-time');
+
+        // --- Functions ---
+        
+        /**
+         * Function to handle the 3-second loading animation.
+         */
+        function startLoadingScreen() {
+            countdownScreen.style.display = 'none';
+            loadingScreen.style.display = 'flex';
+            
+            // Start the CSS animation for the loading bar
+            setTimeout(() => {
+                loadingBar.style.width = '100%';
+            }, 50); 
+            
+            let loadingTimer = 3;
+            loadingTime.textContent = `${loadingTimer} ❤️`;
+
+            const loadingInterval = setInterval(() => {
+                loadingTimer--;
+                loadingTime.textContent = `${loadingTimer} ❤️`;
+
+                if (loadingTimer < 0) {
+                    clearInterval(loadingInterval);
+                    showCakeScreen();
+                }
+            }, 1000);
+        }
+
+
+        /**
+         * Replaces the complex burst logic with the new loading screen call.
+         */
+        function triggerTransitionToCake() {
+            // Stop the floating balloons (optional, but clean)
+            const allBalloons = document.querySelectorAll('.balloon'); 
+            allBalloons.forEach(balloon => {
+                balloon.style.animationPlayState = 'paused';
+            });
+
+            // Start the loading screen
+            startLoadingScreen(); 
+        }
+
+        /**
+         * Starts the initial 10-second countdown.
+         */
+        function startCountdown() {
+            countdownScreen.style.display = 'flex';
+            
+            const countdownInterval = setInterval(() => {
+                countdownElement.textContent = countdownValue;
+                if (countdownValue <= 0) {
+                    clearInterval(countdownInterval);
+                    triggerTransitionToCake(); // Call the new transition function
+                } else {
+                    countdownValue--;
+                }
+            }, 1000);
+        }
+
+        /**
+         * Displays the cake screen.
+         */
+        function showCakeScreen() {
+            loadingScreen.style.display = 'none';
+            cakeScreen.style.display = 'flex';
+            cakeScreen.style.opacity = 1;
+            
+            setTimeout(() => {
+                knifeBtn.focus();
+            }, 500);
+        }
+        
+        /**
+         * Implements the letter-by-letter typing effect.
+         */
+        function typeWriterEffect(element, text, speed) {
+            let i = 0;
+            element.textContent = ''; 
+
+            return new Promise(resolve => {
+                function typing() {
+                    if (i < text.length) {
+                        element.textContent += text.charAt(i);
+                        i++;
+                        setTimeout(typing, speed);
+                    } else {
+                        resolve(); 
+                    }
+                }
+                typing();
+            });
+        }
+        
+        /**
+         * Displays the message screen and starts the typewriter effect.
+         */
+        async function showBirthdayMessage() {
+            cakeScreen.style.display = 'none';
+            messageScreen.style.display = 'flex';
+            
+            messageText.style.display = 'block';
+            giftBtn.style.display = 'none'; 
+            yesNoButtons.style.display = 'none';
+            letterBtn.style.display = 'none';
+            finalGiftCard.style.display = 'none'; 
+            
+            const birthdayMessage = 'HAPPY BIRTHDAY AFREEN!';
+            
+            await typeWriterEffect(messageText, birthdayMessage, 150); 
+
+            giftBtn.style.display = 'block';
+            giftBtn.focus();
+        }
+
+        // --- Event Listeners ---
+        document.getElementById('knife-btn').addEventListener('click', () => {
+            cakeImg.classList.add('clicked');
+            setTimeout(showBirthdayMessage, 800);
+        });
+
+        document.getElementById('gift-btn').addEventListener('click', () => {
+            document.getElementById('gift-btn').style.display = 'none';
+            messageText.textContent = 'ARE YOU ACCEPTING MY GIFT?';
+            document.getElementById('yes-no-buttons').style.display = 'flex'; 
+        });
+
+        document.getElementById('btn-yes').addEventListener('click', () => {
+            messageText.textContent = 'Awesome! I knew you would! Open your special gift card:';
+            document.getElementById('yes-no-buttons').style.display = 'none';
+            document.getElementById('letter-btn').style.display = 'block';
+            document.getElementById('letter-btn').textContent = 'Open Gift Card';
+        });
+
+        document.getElementById('btn-no').addEventListener('click', () => {
+            alert("Wait, please reconsider! It's a special gift! You still have to open this...");
+            messageText.textContent = 'Oh, well! But first, open your special gift card:';
+            document.getElementById('yes-no-buttons').style.display = 'none';
+            document.getElementById('letter-btn').style.display = 'block';
+            document.getElementById('letter-btn').textContent = 'Open Gift Card';
+        });
+
+        document.getElementById('letter-btn').addEventListener('click', () => {
+            messageText.style.display = 'none';
+            document.getElementById('letter-btn').style.display = 'none';
+            
+            setTimeout(() => {
+                finalGiftCard.style.display = 'block';
+            }, 300);
+        });
+
+        // --- Initialization ---
+        startCountdown();
+    </script>
+</body>
+</html>
